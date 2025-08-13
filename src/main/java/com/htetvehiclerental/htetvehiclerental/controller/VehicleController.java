@@ -122,7 +122,6 @@ public ResponseEntity<Page<Vehicle>> searchVehicles(
         try {
             // Read Azure storage config
             String connectionString = System.getProperty("azure.storage.connection-string");
-            System.out.println("Connection String: " + connectionString);
             if (connectionString == null) {
                 connectionString = "your_connection_string_from_properties";
             }
