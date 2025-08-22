@@ -19,7 +19,7 @@ public class EmailService {
     private JavaMailSender mailSender;
 
     public void sendVerificationEmail(Customer user, String token) {
-        String url = "http://localhost:3000/verify?token=" + token;
+        String url = "http://www.htetvehiclerental.com/verify?token=" + token;
         String subject = "Email Verification - Htet Vehicle Rental";
         String cid = "logoImage";
 
@@ -38,7 +38,7 @@ public class EmailService {
     }
 
     public void sendPasswordResetEmail(Customer user, String token) {
-        String url = "http://localhost:3000/reset-password?token=" + token;
+        String url = "http://www.htetvehiclerental.com/reset-password?token=" + token;
         String subject = "Password Reset - Htet Vehicle Rental";
         String cid = "logoImage";
 
