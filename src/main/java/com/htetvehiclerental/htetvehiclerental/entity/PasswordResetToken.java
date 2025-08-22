@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 public class PasswordResetToken {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "token_id")
-    private Long token_id;
+    @Column(name = "reset_token_id")
+    private Long reset_token_id;
 
     @Column(name = "token", nullable = false)
     private String reset_token;
