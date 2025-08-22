@@ -15,8 +15,8 @@ public class PasswordResetToken {
     @Column(name = "token_id")
     private Long token_id;
 
-    @Column(name = "reset_token", nullable = false)
-    private String token;
+    @Column(name = "token", nullable = false)
+    private String reset_token;
 
     @Column(name = "expiry_date", nullable = false)
     private LocalDateTime reset_expiryDate;
