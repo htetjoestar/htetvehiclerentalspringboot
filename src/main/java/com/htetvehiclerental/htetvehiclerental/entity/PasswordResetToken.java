@@ -15,7 +15,7 @@ public class PasswordResetToken {
     @Column(name = "reset_token_id")
     private Long reset_token_id;
 
-    @Column(name = "token", nullable = false)
+    @Column(name = "reset_token", nullable = false)
     private String reset_token;
 
     @Column(name = "expiry_date", nullable = false)
