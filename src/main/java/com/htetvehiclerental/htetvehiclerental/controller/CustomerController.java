@@ -1,5 +1,9 @@
 package com.htetvehiclerental.htetvehiclerental.controller;
 
+import com.azure.storage.blob.BlobClient;
+import com.azure.storage.blob.BlobContainerClient;
+import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.htetvehiclerental.htetvehiclerental.dto.CustomerDto;
 import com.htetvehiclerental.htetvehiclerental.dto.FetchCustomerRequest;
 import com.htetvehiclerental.htetvehiclerental.service.CustomerService;
@@ -13,6 +17,7 @@ import com.htetvehiclerental.htetvehiclerental.entity.Vehicle;
 import lombok.AllArgsConstructor;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -123,17 +128,45 @@ public ResponseEntity<Page<Customer>> searchVehicles(
     public ResponseEntity<String> uploadImage(@PathVariable Long id,
                                               @RequestParam("image") MultipartFile file) {
         try {
-            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-            Path imagePath = Paths.get(IMAGE_UPLOAD_DIR, fileName);
-            Files.createDirectories(imagePath.getParent());
-            Files.write(imagePath, file.getBytes());
+                    // Read Azure storage config
+                    String connectionString = System.getProperty("azure.storage.connection-string");
+                    if (connectionString == null) {
+                        connectionString = "your_connection_string_from_properties";
+                    }
+                    String containerName = "identification";
 
-            String imgUrl = "/identification/" + fileName; // This should match your static resource mapping
-            customerService.updateIdentificationImage(id, imgUrl);
+                    // Create BlobServiceClient
+                    BlobServiceClient blobServiceClient = new BlobServiceClientBuilder()
+                            .connectionString(connectionString)
+                            .buildClient();
 
-            return ResponseEntity.ok(imgUrl);
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Image upload failed");
-        }
+                    // Get container client
+                    BlobContainerClient containerClient = blobServiceClient.getBlobContainerClient(containerName);
+
+                    // Create container if not exists
+                    if (!containerClient.exists()) {
+                        containerClient.create();
+                    }
+
+                    // Generate unique file name
+                    String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+
+                    // Upload file
+                    BlobClient blobClient = containerClient.getBlobClient(fileName);
+                    try (InputStream inputStream = file.getInputStream()) {
+                        blobClient.upload(inputStream, file.getSize(), true);
+                    }
+
+                    // Get public URL (make sure container has public read access)
+                    String imgUrl = blobClient.getBlobUrl();
+
+                    // Update vehicle with image URL
+                    customerService.updateIdentificationImage(id, imgUrl);
+
+                    return ResponseEntity.ok(imgUrl);
+
+                } catch (IOException e) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Image upload failed");
+                }
     }
 }
